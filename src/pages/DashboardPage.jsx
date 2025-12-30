@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { getData } from "../utils/localStorage";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../config/firebase";
+import PageLayout from "../components/layout/PageLayout";
 
 /**
  * DashboardPage
@@ -11,9 +14,32 @@ export default function DashboardPage() {
   const [couriers, setCouriers] = useState([]);
 
   useEffect(() => {
-    setParcels(getData("parcels") || []);
-    setCouriers(getData("couriers") || []);
-  }, []);
+  const loadData = async () => {
+    try {
+      // Fetch parcels
+      const parcelsSnap = await getDocs(collection(db, "parcels"));
+      const allParcels = parcelsSnap.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      // Fetch couriers
+      const couriersSnap = await getDocs(collection(db, "couriers"));
+      const allCouriers = couriersSnap.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      setParcels(allParcels);
+      setCouriers(allCouriers);
+    } catch (err) {
+      console.error("Error loading dashboard data:", err);
+    }
+  };
+
+  loadData();
+}, []);
+
 
   const renderTable = (data, columns) => (
     <table style={styles.table}>
@@ -45,13 +71,15 @@ export default function DashboardPage() {
   );
 
   return (
-    <div style={styles.container}>
-      <h2 style={styles.h2}>Parcel Dashboard</h2>
-      {parcels.length === 0 ? <p style={styles.empty}>No parcels available yet.</p> : renderTable(parcels, ['Name','Parcel Type','Origin','Destination','Pickup Window','Description'])}
+    <PageLayout title="Dashboard">
+      <div style={styles.container}>
+        <h2 style={styles.h2}>Parcel Dashboard</h2>
+        {parcels.length === 0 ? <p style={styles.empty}>No parcels available yet.</p> : renderTable(parcels, ['Name','Parcel Type','Origin','Destination','Pickup Window','Description'])}
 
-      <h2 style={{...styles.h2, marginTop: 40}}>Courier Dashboard</h2>
-      {couriers.length === 0 ? <p style={styles.empty}>No couriers available yet.</p> : renderTable(couriers, ['Name','Origin','Destination','Available Window','Notes'])}
-    </div>
+        <h2 style={{...styles.h2, marginTop: 40}}>Courier Dashboard</h2>
+        {couriers.length === 0 ? <p style={styles.empty}>No couriers available yet.</p> : renderTable(couriers, ['Name','Origin','Destination','Available Window','Notes'])}
+      </div>
+    </PageLayout>
   );
 }
 

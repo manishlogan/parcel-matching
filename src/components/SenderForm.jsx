@@ -1,5 +1,8 @@
 import React, { useState, useMemo } from "react";
 import { getData, saveData } from "../utils/localStorage";
+import { collection, addDoc } from "firebase/firestore";
+import { auth, db } from "../config/firebase";
+import PageLayout from "./layout/PageLayout";
 
 /**
  * SenderForm
@@ -7,6 +10,11 @@ import { getData, saveData } from "../utils/localStorage";
  * - Persists to localStorage under key "parcels".
  */
 export default function SenderForm() {
+const [status, setStatus] = useState(null); // "success" | "error"
+const [message, setMessage] = useState("");
+
+
+
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -54,24 +62,52 @@ export default function SenderForm() {
     return Object.keys(e).length === 0;
   }
 
-  function handleSubmit(e) {
-    e.preventDefault();
-    if (!validate()) return;
+  async function handleSubmit(e) {
+    console.log("Handle submit called");
+  e.preventDefault();
+  if (!validate()) return;
+console.log("Validation passed");
 
-    const payload = {
-      id: crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`,
-      name: form.name.trim(),
-      email: form.email.trim(),
-      parcelType: form.parcelType === "Others" ? form.otherType.trim() : form.parcelType,
-      description: form.description.trim(),
-      origin: { country: form.originCountry.trim(), city: form.originCity.trim() },
-      destination: { country: form.destinationCountry.trim(), city: form.destinationCity.trim() },
-      pickupWindow: { start: form.pickupStart, end: form.pickupEnd }, // YYYY-MM-DD
-      createdAt: new Date().toISOString(),
-    };
+if (!auth.currentUser) {
+    console.error("Not authenticated - aborting write");
+    setStatus("error");
+    setMessage("You must be signed in to submit a parcel.");
+    return;
+  }
 
-    const existing = getData("parcels");
-    saveData("parcels", [...existing, payload]);
+
+  const payload = {
+    name: form.name.trim(),
+    email: form.email.trim(),
+    parcelType:
+      form.parcelType === "Others"
+        ? form.otherType.trim()
+        : form.parcelType,
+    description: form.description.trim(),
+    origin: {
+      country: form.originCountry.trim(),
+      city: form.originCity.trim(),
+    },
+    destination: {
+      country: form.destinationCountry.trim(),
+      city: form.destinationCity.trim(),
+    },
+    pickupWindow: {
+      start: form.pickupStart,
+      end: form.pickupEnd,
+    },
+    createdAt: new Date().toISOString(),
+  };
+
+  console.log("Payload created:", payload);
+
+  try {
+    console.log("Payload Submitting:", payload);
+    const docRef = await addDoc(collection(db, "parcels"), payload);
+    console.log("Parcel saved, id:", docRef.id);
+
+    setStatus("success");
+    setMessage("✅ Parcel submitted successfully");
 
     setSaved(true);
     setForm({
@@ -88,12 +124,32 @@ export default function SenderForm() {
       destinationCity: "",
     });
     setErrors({});
+  } catch (err) {
+    console.log("Payload Failed to submit:", payload);
+    console.error("Error saving parcel:", err);
+    setStatus("error");
+    setMessage("❌ Failed to submit parcel. Please try again.");
+    // Optional: show UI error
   }
+}
+
 
   const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
   const minEnd = form.pickupStart || today;
 
   return (
+    <PageLayout title="Send Parcel">
+    
+    <div className={`form-message ${status}`}>
+        {message}
+      </div>
+
+    {status && (
+      <div className={`form-message ${status}`}>
+        {message}
+      </div>
+    )}
+
     <form onSubmit={handleSubmit} className="sender-form" style={styles.form}>
       <h2 style={styles.h2}>Send a Parcel</h2>
 
@@ -187,6 +243,7 @@ export default function SenderForm() {
       <button type="submit" style={styles.button}>Save Parcel</button>
       {saved && <div style={styles.success}>Saved! Your parcel is now visible to couriers within the selected window.</div>}
     </form>
+    </PageLayout>
   );
 }
 
