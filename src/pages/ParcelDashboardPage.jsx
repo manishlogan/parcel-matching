@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { getData } from "../utils/localStorage";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../config/firebase";
+
+import PageLayout from "../components/layout/PageLayout";
+
 
 /**
  * ParcelDashboardPage
@@ -8,6 +13,8 @@ import { getData } from "../utils/localStorage";
  */
 export default function ParcelDashboardPage() {
   const [parcels, setParcels] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const [filteredParcels, setFilteredParcels] = useState([]);
 
   const [originFilter, setOriginFilter] = useState("");
@@ -18,9 +25,22 @@ export default function ParcelDashboardPage() {
   const [dateError, setDateError] = useState("");
 
   useEffect(() => {
-    const storedParcels = getData("parcels") || [];
-    setParcels(storedParcels);
-    setFilteredParcels(storedParcels);
+    const fetchParcels = async () => {
+      try {
+        const snap = await getDocs(collection(db, "parcels"));
+        const allParcels = snap.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setParcels(allParcels);
+      } catch (err) {
+        console.error("Error fetching parcels:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchParcels();
   }, []);
 
   useEffect(() => {
@@ -70,25 +90,27 @@ export default function ParcelDashboardPage() {
   }, [originFilter, destinationFilter, typeFilter, searchText, dateRange, parcels]);
 
   const renderTable = (data) => (
-    <table style={styles.table}>
-      <thead style={styles.thead}>
+    <table>
+      <thead>
         <tr>
-          <th>Name</th>
+          <th>Sender</th>
           <th>Parcel Type</th>
           <th>Origin</th>
           <th>Destination</th>
-          <th>Pickup Window</th>
+          <th>Pickup Window From</th>
+          <th>Pickup Window To</th>
           <th>Description</th>
         </tr>
       </thead>
       <tbody>
         {data.map((p) => (
-          <tr key={p.id} style={styles.row}>
+          <tr key={p.id}>
             <td>{p.name || '-'}</td>
             <td>{p.parcelType || '-'}</td>
             <td>{p.origin?.city || '-'}, {p.origin?.country || '-'}</td>
             <td>{p.destination?.city || '-'}, {p.destination?.country || '-'}</td>
-            <td>{p.pickupWindow?.start || '-'} → {p.pickupWindow?.end || '-'}</td>
+            <td>{p.pickupWindow?.start || '-'}</td>
+            <td>{p.pickupWindow?.end || '-'}</td>
             <td>{p.description || '-'}</td>
           </tr>
         ))}
@@ -96,75 +118,62 @@ export default function ParcelDashboardPage() {
     </table>
   );
 
-  return (
-    <div style={styles.container}>
-      <h2 style={styles.h2}>Parcel Dashboard</h2>
-
-      <div style={styles.filters}>
+return (
+    <PageLayout title="Parcel Dashboard">
+      <div>
+        <div>
         <input
           type="text"
           placeholder="Filter by Origin City"
           value={originFilter}
           onChange={e => setOriginFilter(e.target.value)}
-          style={styles.input}
+
         />
         <input
           type="text"
           placeholder="Filter by Destination City"
           value={destinationFilter}
           onChange={e => setDestinationFilter(e.target.value)}
-          style={styles.input}
         />
         <input
           type="text"
           placeholder="Filter by Parcel Type"
           value={typeFilter}
           onChange={e => setTypeFilter(e.target.value)}
-          style={styles.input}
+          
         />
         <input
           type="text"
           placeholder="Search Description"
           value={searchText}
           onChange={e => setSearchText(e.target.value)}
-          style={styles.input}
+          
         />
         <input
           type="date"
           placeholder="Start Date"
           value={dateRange.start}
           onChange={e => setDateRange({ ...dateRange, start: e.target.value })}
-          style={styles.input}
+          
         />
         <input
           type="date"
           placeholder="End Date"
           value={dateRange.end}
           onChange={e => setDateRange({ ...dateRange, end: e.target.value })}
-          style={styles.input}
+          
         />
       </div>
 
-      {dateError && <p style={{ color: 'red', marginBottom: 8 }}>{dateError}</p>}
+      {dateError && <p>{dateError}</p>}
 
       {filteredParcels.length === 0 ? (
-        <p style={styles.empty}>No parcels match the filters.</p>
+        <p>No parcels match the filters.</p>
       ) : (
         renderTable(filteredParcels)
       )}
     </div>
+
+    </PageLayout>
   );
 }
-
-const styles = {
-  container: { maxWidth: 900, margin: "20px auto", padding: 16, fontFamily: 'Arial, sans-serif' },
-  h2: { marginBottom: 16, fontSize: 24, color: '#111827' },
-  filters: { display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' },
-  input: { padding: '8px 12px', borderRadius: 6, border: '1px solid #d1d5db', minWidth: 160 },
-  table: { width: "100%", borderCollapse: "separate", borderSpacing: '0 8px', backgroundColor: '#f9fafb', borderRadius: 12, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' },
-  thead: { backgroundColor: '#1f2937', color: '#fff', textAlign: 'left', fontWeight: 600 },
-  row: { backgroundColor: '#fff', transition: 'background 0.2s', cursor: 'pointer' },
-  td: { padding: '12px 16px', borderBottom: '1px solid #e5e7eb' },
-  th: { padding: '12px 16px' },
-  empty: { fontStyle: 'italic', color: '#6b7280', marginTop: 8 },
-};
