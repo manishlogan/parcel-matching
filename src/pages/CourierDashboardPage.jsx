@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { getData } from "../utils/localStorage";
+import { collection, getDocs, query, orderBy } from "firebase/firestore";
+import { db } from "../config/firebase";
+import { Mail } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { getOrCreateConversation } from "../utils/conversations"; // from Step 1
+import { auth } from "../config/firebase";
+
 
 /**
  * CourierDashboardPage
@@ -10,8 +17,28 @@ export default function CourierDashboardPage() {
   const [couriers, setCouriers] = useState([]);
 
   useEffect(() => {
-    setCouriers(getData("couriers") || []);
+    const fetchCouriers = async () => {
+      try {
+        const q = query(
+          collection(db, "couriers"),
+          orderBy("createdAt", "desc")
+        );
+
+        const snapshot = await getDocs(q);
+        const results = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        setCouriers(results);
+      } catch (err) {
+        console.error("Failed to fetch couriers:", err);
+      }
+    };
+
+    fetchCouriers();
   }, []);
+
 
   const renderTable = (data) => (
     <table style={styles.table}>
@@ -32,11 +59,42 @@ export default function CourierDashboardPage() {
             <td>{c.destination?.city || '-'}, {c.destination?.country || '-'}</td>
             <td>{c.availableWindow?.start || '-'} → {c.availableWindow?.end || '-'}</td>
             <td>{c.notes || '-'}</td>
+            <td style={styles.td}>
+    {c.userId !== auth.currentUser.uid && (
+      <Mail
+        size={18}
+        style={{ cursor: "pointer" }}
+        onClick={() =>
+          startConversationHandler(c.userId, c.id, "courier")
+        }
+      />
+    )}
+  </td>
           </tr>
         ))}
       </tbody>
     </table>
   );
+
+const navigate = useNavigate();
+
+const startConversationHandler = async (
+  targetUserId,
+  contextId,
+  contextType
+) => {
+  try {
+    const conversationId = await getOrCreateConversation({
+      currentUserId: auth.currentUser.uid,
+      targetUserId,
+      courierId: contextType === "courier" ? contextId : null,
+    });
+
+    navigate(`/messages/${conversationId}`);
+  } catch (err) {
+    console.error("Conversation error:", err);
+  }
+};
 
   return (
     <div style={styles.container}>

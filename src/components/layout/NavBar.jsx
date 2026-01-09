@@ -29,6 +29,7 @@ const NavBar = () => {
       <Link to="/parcels">Parcel Dashboard</Link>
       <Link to="/couriers">Courier Dashboard</Link>
       <Link to="/profile/edit">Profile</Link>
+      <Link to="/messages">Messages</Link>
 
       {/* Admin-only links */}
       {role === "admin" && (

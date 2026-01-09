@@ -1,5 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { getData, saveData } from "../utils/localStorage";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { auth, db } from "../config/firebase";
 
 /**
  * CourierForm
@@ -43,7 +45,7 @@ export default function CourierForm() {
     return Object.keys(e).length === 0;
   }
 
-  function handleSubmit(e) {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
 
@@ -58,7 +60,11 @@ export default function CourierForm() {
     };
 
     const existing = getData("couriers");
-    saveData("couriers", [...existing, payload]);
+    await addDoc(collection(db, "couriers"), {
+      ...payload,
+      userId: auth.currentUser.uid,
+      createdAt: serverTimestamp(),
+    });
 
     setSaved(true);
     setForm({

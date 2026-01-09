@@ -79,6 +79,7 @@ if (!auth.currentUser) {
   const payload = {
     name: form.name.trim(),
     email: form.email.trim(),
+    userId: auth.currentUser.uid,
     parcelType:
       form.parcelType === "Others"
         ? form.otherType.trim()

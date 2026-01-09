@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { getData } from "../utils/localStorage";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../config/firebase";
+import { auth, db } from "../config/firebase";
+import { addDoc, collection, serverTimestamp, getDocs } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
 
 import PageLayout from "../components/layout/PageLayout";
 
@@ -23,6 +24,14 @@ export default function ParcelDashboardPage() {
   const [searchText, setSearchText] = useState("");
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [dateError, setDateError] = useState("");
+
+  const [showMessageModal, setShowMessageModal] = useState(false);
+  const [messageTarget, setMessageTarget] = useState(null);
+  const [messageText, setMessageText] = useState("");
+  
+  useEffect(() => {
+    console.log("Modal state changed:", showMessageModal, messageTarget);
+  }, [showMessageModal, messageTarget]);
 
   useEffect(() => {
     const fetchParcels = async () => {
@@ -100,6 +109,7 @@ export default function ParcelDashboardPage() {
           <th>Pickup Window From</th>
           <th>Pickup Window To</th>
           <th>Description</th>
+          <th>Message</th>
         </tr>
       </thead>
       <tbody>
@@ -112,13 +122,105 @@ export default function ParcelDashboardPage() {
             <td>{p.pickupWindow?.start || '-'}</td>
             <td>{p.pickupWindow?.end || '-'}</td>
             <td>{p.description || '-'}</td>
+            <td>
+            <button
+              onClick={() => {
+                console.log("MESSAGE CLICKED", p.id, p.userId);
+                setMessageTarget({
+                  receiverId: p.userId,
+                  parcelId: p.id,
+                });
+                setShowMessageModal(true);
+              }}
+
+              // disabled={p.userId === auth.currentUser?.uid}
+              style={{
+                background: "none",
+                border: "none",
+                // cursor: p.userId === auth.currentUser?.uid ? "not-allowed" : "pointer",
+                cursor: "pointer",
+                fontSize: 18,
+                opacity: p.userId === auth.currentUser?.uid ? 0.4 : 1,
+              }}
+              title="Message parcel owner"
+            >
+              💬
+            </button>
+          </td>
+
           </tr>
         ))}
       </tbody>
     </table>
   );
 
+  const navigate = useNavigate();
+
+const startConversationHandler = async (receiverId, parcelId) => {
+  const currentUser = auth.currentUser;
+  if (!currentUser) return;
+
+  // if (currentUser.uid === receiverId) {
+  //   alert("You cannot message yourself");
+  //   return;
+  // }
+
+  const conversationRef = await addDoc(collection(db, "conversations"), {
+    participants: [currentUser.uid, receiverId],
+    parcelId,
+    createdAt: serverTimestamp(),
+    lastMessageAt: serverTimestamp(),
+  });
+
+  navigate(`/messages/${conversationRef.id}`);
+};
+
+const overlayStyle = {
+  position: "fixed",
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  background: "rgba(0,0,0,0.4)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  zIndex: 1000,
+};
+
+const modalStyle = {
+  background: "#fff",
+  padding: 20,
+  borderRadius: 8,
+  width: 400,
+};
+
+const sendMessageHandler = async () => {
+  const currentUser = auth.currentUser;
+  if (!currentUser || !messageTarget) return;
+
+  const { receiverId, parcelId } = messageTarget;
+
+  const conversationRef = await addDoc(collection(db, "conversations"), {
+    participants: [currentUser.uid, receiverId],
+    parcelId,
+    createdAt: serverTimestamp(),
+    lastMessageAt: serverTimestamp(),
+  });
+
+  await addDoc(collection(db, "messages"), {
+    conversationId: conversationRef.id,
+    senderId: currentUser.uid,
+    text: messageText.trim(),
+    createdAt: serverTimestamp(),
+  });
+
+  setMessageText("");
+  setShowMessageModal(false);
+};
+
 return (
+
     <PageLayout title="Parcel Dashboard">
       <div>
         <div>
@@ -163,7 +265,37 @@ return (
           onChange={e => setDateRange({ ...dateRange, end: e.target.value })}
           
         />
+
       </div>
+
+      {showMessageModal && (
+  <div style={overlayStyle}>
+    <div style={modalStyle}>
+      <h3>Send message</h3>
+
+      <textarea
+        value={messageText}
+        onChange={(e) => setMessageText(e.target.value)}
+        placeholder="Write your message..."
+        rows={4}
+        style={{ width: "100%", padding: 8 }}
+      />
+
+      <div style={{ marginTop: 12, textAlign: "right" }}>
+        <button onClick={() => setShowMessageModal(false)}>
+          Cancel
+        </button>
+        <button
+          onClick={sendMessageHandler}
+          disabled={!messageText.trim()}
+          style={{ marginLeft: 8 }}
+        >
+          Send
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
       {dateError && <p>{dateError}</p>}
 
