@@ -125,11 +125,14 @@ export default function ParcelDashboardPage() {
             <td>
             <button
               onClick={() => {
-                console.log("MESSAGE CLICKED", p.id, p.userId);
+                console.log("MESSAGE CLICKED - parcel:", p);
+                console.log("current auth user:", auth.currentUser);
                 setMessageTarget({
-                  receiverId: p.userId,
-                  parcelId: p.id,
-                });
+                receiverId: p.userId,
+                parcelId: p.id,
+                receiverName: p.name,
+                parcelType: p.parcelType,
+              });
                 setShowMessageModal(true);
               }}
 
@@ -197,20 +200,33 @@ const modalStyle = {
 
 const sendMessageHandler = async () => {
   const currentUser = auth.currentUser;
-  if (!currentUser || !messageTarget) return;
+  if (!currentUser || !messageTarget || !messageText.trim()) return;
 
-  const { receiverId, parcelId } = messageTarget;
+  const {
+    receiverId,
+    parcelId,
+    receiverName,
+    receiverEmail,
+    parcelType,
+  } = messageTarget;
 
+  // 1️⃣ Create conversation
   const conversationRef = await addDoc(collection(db, "conversations"), {
     participants: [currentUser.uid, receiverId],
     parcelId,
+    initiatorName: currentUser.displayName || "",
+    otherUserName: receiverName || "",
+    parcelType: parcelType || "",
+    lastMessage: messageText.trim(),
     createdAt: serverTimestamp(),
     lastMessageAt: serverTimestamp(),
   });
 
+  // 2️⃣ Create message
   await addDoc(collection(db, "messages"), {
     conversationId: conversationRef.id,
     senderId: currentUser.uid,
+    senderName: currentUser.displayName || "",
     text: messageText.trim(),
     createdAt: serverTimestamp(),
   });
