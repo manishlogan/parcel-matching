@@ -14,6 +14,9 @@ import ParcelPage from "./pages/ParcelPage";
 import ParcelDashboardPage from "./pages/ParcelDashboardPage";
 import EditProfilePage from "./pages/EditProfilePage";
 import ShowAllUsersPage from "./pages/admin/ShowAllUsersPage";
+import { getOrCreateConversation } from "./utils/conversations";
+import { auth } from "./config/firebase";
+import MessagesPage from "./pages/MessagesPage";
 
 function HomeRedirect() {
   const { user, role, loading } = useAuth();
@@ -25,7 +28,6 @@ function HomeRedirect() {
 
 function App() {
   console.log("App rendered");
-
 
   return (
     
@@ -42,7 +44,7 @@ function App() {
             <Route path="/parcels" element={<ProtectedRoute><ParcelDashboardPage /></ProtectedRoute>} />
             <Route path="/couriers" element={<ProtectedRoute><CourierDashboardPage /></ProtectedRoute>} />
             <Route path="/profile/edit" element={<ProtectedRoute><EditProfilePage /></ProtectedRoute>} />
-
+            <Route path="/messages" element={<MessagesPage />} />
             <Route path="/admin" element={<ProtectedRoute adminOnly={true}><DashboardPage /></ProtectedRoute>} />
             <Route path="/admin/users" element={<ProtectedRoute adminOnly={true}><ShowAllUsersPage /></ProtectedRoute>} />
 
