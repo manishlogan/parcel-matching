@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getData } from "../utils/localStorage";
-import { collection, getDocs, query, orderBy, addDoc, serverTimestamp, updateDoc, doc } from "firebase/firestore";
+import { collection, getDocs, query, orderBy, addDoc, serverTimestamp, updateDoc, doc, getDoc } from "firebase/firestore";
 import { db } from "../config/firebase";
 import { Mail } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -154,6 +154,26 @@ const sendMessageHandler = async () => {
       // not critical if it fails
       console.warn("Could not update conversation meta:", err);
     }
+
+    // ensure conversation has sender's name so left-pane shows it
+    try {
+      const convoRef = doc(db, "conversations", conversationId);
+      // set participantNames.<uid> = displayName (creates map if missing)
+      await updateDoc(convoRef, {
+        [`participantNames.${currentUser.uid}`]: currentUser.displayName || "",
+      });
+        // also set initiatorName if it's not already present (don't overwrite existing value)
+      const convoSnap = await getDoc(convoRef);
+      if (convoSnap.exists()) {
+        const cdata = convoSnap.data();
+        if (!cdata?.initiatorName || !cdata.initiatorName.trim()) {
+          await updateDoc(convoRef, { initiatorName: currentUser.displayName || "" });
+        }
+      }
+    } catch (err) {
+      console.warn("Could not set participant name on conversation:", err);
+    }
+
 
     setMessageText("");
     setShowMessageModal(false);
