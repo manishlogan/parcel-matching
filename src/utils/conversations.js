@@ -22,9 +22,9 @@ export const getOrCreateConversation = async ({
   }
 
   // 🚫 Prevent self messaging
-  if (currentUserId === targetUserId) {
-    throw new Error("Cannot create conversation with yourself");
-  }
+//   if (currentUserId === targetUserId) {
+//     throw new Error("Cannot create conversation with yourself");
+//   }
 
   // 🔍 Look for existing conversation
   const q = query(
