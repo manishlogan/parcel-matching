@@ -182,7 +182,6 @@ const sendMessageHandler = async () => {
     receiverId,
     parcelId,
     receiverName,
-    receiverEmail,
     parcelType,
   } = messageTarget;
 
