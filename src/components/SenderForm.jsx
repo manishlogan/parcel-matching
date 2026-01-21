@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from "react";
-import { getData, saveData } from "../utils/localStorage";
 import { collection, addDoc } from "firebase/firestore";
 import { auth, db } from "../config/firebase";
 import PageLayout from "./layout/PageLayout";

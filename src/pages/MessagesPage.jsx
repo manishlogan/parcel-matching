@@ -16,7 +16,6 @@ const MessagesPage = () => {
   const [conversations, setConversations] = useState([]);
   const [activeConversation, setActiveConversation] = useState(null);
   const [messages, setMessages] = useState([]);
-  const [text, setText] = useState("");
   const [messageText, setMessageText] = useState("");
 
 

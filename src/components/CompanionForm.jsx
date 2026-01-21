@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from "react";
-import { getData, saveData } from "../utils/localStorage";
+import React, { useState } from "react";
+import { getData } from "../utils/localStorage";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "../config/firebase";
 
@@ -59,7 +59,6 @@ export default function CompanionForm() {
       createdAt: new Date().toISOString(),
     };
 
-    const existing = getData("couriers");
     await addDoc(collection(db, "couriers"), {
       ...payload,
       userId: auth.currentUser.uid,

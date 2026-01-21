@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { getData } from "../utils/localStorage";
 import { collection, getDocs, query, orderBy, addDoc, serverTimestamp, updateDoc, doc, getDoc } from "firebase/firestore";
 import { db } from "../config/firebase";
-import { Mail } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { getOrCreateConversation } from "../utils/conversations"; // from Step 1
 import { auth } from "../config/firebase";
@@ -104,24 +102,6 @@ export default function CompanionDashboardPage() {
   );
 
 const navigate = useNavigate();
-
-const startConversationHandler = async (
-  targetUserId,
-  contextId,
-  contextType
-) => {
-  try {
-    const conversationId = await getOrCreateConversation({
-      currentUserId: auth.currentUser.uid,
-      targetUserId,
-      courierId: contextType === "companion" ? contextId : null,
-    });
-
-    navigate(`/messages/${conversationId}`);
-  } catch (err) {
-    console.error("Conversation error:", err);
-  }
-};
 
 // send initial message from modal: create/ensure conversation, create message, update convo meta, navigate to messages page
 const sendMessageHandler = async () => {

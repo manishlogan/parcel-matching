@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { getData } from "../utils/localStorage";
 import { auth, db } from "../config/firebase";
 import { addDoc, collection, serverTimestamp, getDocs } from "firebase/firestore";
-import { useNavigate } from "react-router-dom";
 
 import PageLayout from "../components/layout/PageLayout";
 
@@ -14,7 +12,6 @@ import PageLayout from "../components/layout/PageLayout";
  */
 export default function ParcelDashboardPage() {
   const [parcels, setParcels] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   const [filteredParcels, setFilteredParcels] = useState([]);
 
@@ -45,7 +42,7 @@ export default function ParcelDashboardPage() {
       } catch (err) {
         console.error("Error fetching parcels:", err);
       } finally {
-        setLoading(false);
+        
       }
     };
 
@@ -156,27 +153,6 @@ export default function ParcelDashboardPage() {
       </tbody>
     </table>
   );
-
-  const navigate = useNavigate();
-
-const startConversationHandler = async (receiverId, parcelId) => {
-  const currentUser = auth.currentUser;
-  if (!currentUser) return;
-
-  // if (currentUser.uid === receiverId) {
-  //   alert("You cannot message yourself");
-  //   return;
-  // }
-
-  const conversationRef = await addDoc(collection(db, "conversations"), {
-    participants: [currentUser.uid, receiverId],
-    parcelId,
-    createdAt: serverTimestamp(),
-    lastMessageAt: serverTimestamp(),
-  });
-
-  navigate(`/messages/${conversationRef.id}`);
-};
 
 const overlayStyle = {
   position: "fixed",
