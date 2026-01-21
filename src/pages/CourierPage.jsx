@@ -1,4 +1,4 @@
-import CourierForm from "../components/CourierForm";
+import CourierForm from "../components/CompanionForm";
 
 export default function CourierPage() {
   return (

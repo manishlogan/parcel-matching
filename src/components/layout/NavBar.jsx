@@ -25,9 +25,9 @@ const NavBar = () => {
     <nav className="navbar">
       {/* Regular user links */}
       <Link to="/sender">Send Parcel</Link>
-      <Link to="/courier">Courier Form</Link>
+      <Link to="/companion">Companion Form</Link>
       <Link to="/parcels">Parcel Dashboard</Link>
-      <Link to="/couriers">Courier Dashboard</Link>
+      <Link to="/companions">Companion Dashboard</Link>
       <Link to="/profile/edit">Profile</Link>
       <Link to="/messages">Messages</Link>
 

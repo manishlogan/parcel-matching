@@ -1,17 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { getData } from "../utils/localStorage";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, deleteDoc, doc} from "firebase/firestore";
 import { db } from "../config/firebase";
 import PageLayout from "../components/layout/PageLayout";
 
 /**
  * DashboardPage
- * - Displays both Parcels and Couriers
+ * - Displays both Parcels and Companions
  * - Styled for better visual presentation
  */
 export default function DashboardPage() {
   const [parcels, setParcels] = useState([]);
-  const [couriers, setCouriers] = useState([]);
+  const [companions, setCompanions] = useState([]);
+
+  // confirmation modal state
+  const [confirmVisible, setConfirmVisible] = useState(false);
+  const [confirmTarget, setConfirmTarget] = useState(null); // { id, type: 'parcel'|'companion', name }
+  const [confirmLoading, setConfirmLoading] = useState(false);
 
   useEffect(() => {
   const loadData = async () => {
@@ -23,15 +28,15 @@ export default function DashboardPage() {
         ...doc.data(),
       }));
 
-      // Fetch couriers
-      const couriersSnap = await getDocs(collection(db, "couriers"));
-      const allCouriers = couriersSnap.docs.map((doc) => ({
+      // Fetch companions
+      const companionsSnap = await getDocs(collection(db, "couriers"));
+      const allCompanions = companionsSnap.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
 
       setParcels(allParcels);
-      setCouriers(allCouriers);
+      setCompanions(allCompanions);
     } catch (err) {
       console.error("Error loading dashboard data:", err);
     }
@@ -40,8 +45,39 @@ export default function DashboardPage() {
   loadData();
 }, []);
 
+const openConfirm = ({ id, type, name }) => {
+    setConfirmTarget({ id, type, name });
+    setConfirmVisible(true);
+  };
 
-  const renderTable = (data, columns) => (
+  const closeConfirm = () => {
+    setConfirmVisible(false);
+    setConfirmTarget(null);
+    setConfirmLoading(false);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!confirmTarget) return;
+    setConfirmLoading(true);
+    const { id, type } = confirmTarget;
+    const collectionName = type === "parcel" ? "parcels" : "couriers";
+
+    try {
+      await deleteDoc(doc(db, collectionName, id));
+      if (type === "parcel") {
+        setParcels((p) => p.filter((r) => r.id !== id));
+      } else {
+        setCompanions((c) => c.filter((r) => r.id !== id));
+      }
+      closeConfirm();
+    } catch (err) {
+      console.error("Delete failed:", err);
+      alert("Failed to delete. Check console for details.");
+      setConfirmLoading(false);
+    }
+  };
+
+  const renderTable = (data, columns, rowType) => (
     <table style={styles.table}>
       <thead style={styles.thead}>
         <tr>
@@ -61,7 +97,14 @@ export default function DashboardPage() {
                 case 'Available Window': return <td key={col}>{row.availableWindow?.start || '-'} → {row.availableWindow?.end || '-'}</td>;
                 case 'Description': return <td key={col}>{row.description || '-'}</td>;
                 case 'Notes': return <td key={col}>{row.notes || '-'}</td>;
-                default: return <td key={col}>-</td>;
+                default: return <td key={col} style={styles.td}>
+                  <button
+                    onClick={() => openConfirm({ id: row.id, type: rowType === "parcel" ? "parcel" : "companion", name: row.name })}
+                    style={styles.deleteButton}
+                    aria-label={`Delete ${rowType}`}
+                  >
+                    ✖
+                  </button></td>;
               }
             })}
           </tr>
@@ -74,11 +117,26 @@ export default function DashboardPage() {
     <PageLayout title="Dashboard">
       <div style={styles.container}>
         <h2 style={styles.h2}>Parcel Dashboard</h2>
-        {parcels.length === 0 ? <p style={styles.empty}>No parcels available yet.</p> : renderTable(parcels, ['Name','Parcel Type','Origin','Destination','Pickup Window','Description'])}
+        {parcels.length === 0 ? <p style={styles.empty}>No parcels available yet.</p> : renderTable(parcels, ['Name','Parcel Type','Origin','Destination','Pickup Window','Description', ''], 'parcel')}
 
-        <h2 style={{...styles.h2, marginTop: 40}}>Courier Dashboard</h2>
-        {couriers.length === 0 ? <p style={styles.empty}>No couriers available yet.</p> : renderTable(couriers, ['Name','Origin','Destination','Available Window','Notes'])}
+        <h2 style={{...styles.h2, marginTop: 40}}>Companion Dashboard</h2>
+        {companions.length === 0 ? <p style={styles.empty}>No companions available yet.</p> : renderTable(companions, ['Name','Origin','Destination','Available Window','Description', ''], 'companion')}
       </div>
+
+      {confirmVisible && confirmTarget && (
+        <div style={modalStyles.overlay}>
+          <div style={modalStyles.modal}>
+            <h3 style={{ marginTop: 0 }}>Confirm delete</h3>
+            <p>Delete {confirmTarget.type === "parcel" ? "parcel from" : "companion"} <strong>{confirmTarget.name || confirmTarget.id}</strong>?</p>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginTop: 12 }}>
+              <button onClick={closeConfirm} style={modalStyles.cancelButton} disabled={confirmLoading}>Cancel</button>
+              <button onClick={handleConfirmDelete} style={modalStyles.deleteButton} disabled={confirmLoading}>
+                {confirmLoading ? "Deleting…" : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </PageLayout>
   );
 }
@@ -92,4 +150,25 @@ const styles = {
   td: { padding: '12px 16px', borderBottom: '1px solid #e5e7eb' },
   th: { padding: '12px 16px' },
   empty: { fontStyle: 'italic', color: '#6b7280', marginTop: 8 },
+};
+
+const modalStyles = {
+  overlay: {
+    position: "fixed",
+    inset: 0,
+    background: "rgba(0,0,0,0.35)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 9999,
+  },
+  modal: {
+    width: 420,
+    background: "#fff",
+    padding: 16,
+    borderRadius: 8,
+    boxShadow: "0 6px 24px rgba(0,0,0,0.12)",
+  },
+  cancelButton: { padding: "8px 12px", borderRadius: 6, background: "#e5e7eb", border: "none" },
+  deleteButton: { padding: "8px 12px", borderRadius: 6, background: "#b91c1c", color: "#fff", border: "none" },
 };

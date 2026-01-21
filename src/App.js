@@ -7,9 +7,8 @@ import NavBar from "./components/layout/NavBar";
 
 import GoogleLogin from "./pages/GoogleLogin";
 import DashboardPage from "./pages/DashboardPage";
-import CourierPage from "./pages/CourierPage";
-import CourierForm from "./components/CourierForm";
-import CourierDashboardPage from "./pages/CourierDashboardPage";
+import CompanionForm from "./components/CompanionForm";
+import CompanionDashboardPage from "./pages/CompanionDashboardPage";
 import ParcelPage from "./pages/ParcelPage";
 import ParcelDashboardPage from "./pages/ParcelDashboardPage";
 import EditProfilePage from "./pages/EditProfilePage";
@@ -40,9 +39,9 @@ function App() {
 
             <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
             <Route path="/sender" element={<ProtectedRoute><ParcelPage /></ProtectedRoute>} />
-            <Route path="/courier" element={<ProtectedRoute><CourierForm /></ProtectedRoute>} />
+            <Route path="/companion" element={<ProtectedRoute><CompanionForm /></ProtectedRoute>} />
             <Route path="/parcels" element={<ProtectedRoute><ParcelDashboardPage /></ProtectedRoute>} />
-            <Route path="/couriers" element={<ProtectedRoute><CourierDashboardPage /></ProtectedRoute>} />
+            <Route path="/companions" element={<ProtectedRoute><CompanionDashboardPage /></ProtectedRoute>} />
             <Route path="/profile/edit" element={<ProtectedRoute><EditProfilePage /></ProtectedRoute>} />
             <Route path="/messages" element={<MessagesPage />} />
             <Route path="/admin" element={<ProtectedRoute adminOnly={true}><DashboardPage /></ProtectedRoute>} />

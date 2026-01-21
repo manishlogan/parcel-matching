@@ -1,6 +1,6 @@
 /* ---------- Design tokens ---------- */
 :root {
-  --max-width: 480px;
+  --max-width: 800px;
   --primary-color: #2563eb;
   --border-color: #e5e7eb;
   --bg-light: #f9fafb;
