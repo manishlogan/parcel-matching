@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { getData } from "../utils/localStorage";
 import { collection, getDocs, deleteDoc, doc} from "firebase/firestore";
 import { db } from "../config/firebase";
 import PageLayout from "../components/layout/PageLayout";

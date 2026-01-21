@@ -13,8 +13,6 @@ import ParcelPage from "./pages/ParcelPage";
 import ParcelDashboardPage from "./pages/ParcelDashboardPage";
 import EditProfilePage from "./pages/EditProfilePage";
 import ShowAllUsersPage from "./pages/admin/ShowAllUsersPage";
-import { getOrCreateConversation } from "./utils/conversations";
-import { auth } from "./config/firebase";
 import MessagesPage from "./pages/MessagesPage";
 
 function HomeRedirect() {
