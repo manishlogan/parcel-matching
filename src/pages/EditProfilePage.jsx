@@ -14,6 +14,8 @@ const EditProfilePage = () => {
   });
 
   const [originalForm, setOriginalForm] = useState(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [toast, setToast] = useState({ visible: false, message: "", type: "success" });
 
   const userId = auth.currentUser?.uid;
 
@@ -48,21 +50,39 @@ const EditProfilePage = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const showToast = (message, type = "success", ms = 3000) => {
+    setToast({ visible: true, message, type });
+    setTimeout(() => setToast((t) => ({ ...t, visible: false })), ms);
+  };
+
   const handleSave = async () => {
-  await updateDoc(doc(db, "users", userId), {
-    name: form.name,
-    phone: form.phone,
-    bio: form.bio,
-  });
+    if (!userId) {
+      showToast("Unable to save: not signed in.", "error");
+      return;
+    }
 
-  setOriginalForm({
-    name: form.name,
-    phone: form.phone,
-    bio: form.bio,
-  });
+    setIsSaving(true);
+    try {
+      await updateDoc(doc(db, "users", userId), {
+        name: form.name,
+        phone: form.phone,
+        bio: form.bio,
+      });
 
-  alert("Profile updated");
-};
+      setOriginalForm({
+        name: form.name,
+        phone: form.phone,
+        bio: form.bio,
+      });
+
+      showToast("Profile updated", "success");
+    } catch (err) {
+      console.error("Failed to update profile", err);
+      showToast("Failed to update profile. Please try again.", "error");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   const isChanged =
       originalForm &&
@@ -104,9 +124,30 @@ const EditProfilePage = () => {
         />
       </div>
 
-      <button disabled={!isChanged} onClick={handleSave}>
-        Save
+      <button disabled={!isChanged || isSaving} onClick={handleSave}>
+        {isSaving ? "Saving..." : "Save"}
       </button>
+
+      {toast.visible && (
+        <div
+          style={{
+            position: "fixed",
+            left: "50%",
+            transform: "translateX(-50%)",
+            bottom: 24,
+            padding: "10px 16px",
+            color: "#fff",
+            background: toast.type === "success" ? "#16a34a" : "#dc2626",
+            borderRadius: 8,
+            boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
+            zIndex: 9999,
+            maxWidth: "90%",
+            textAlign: "center",
+          }}
+        >
+          {toast.message}
+        </div>
+      )}
 
     </PageLayout>
   );

@@ -172,9 +172,9 @@ const closeModal = () => {
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.h2}>Companion Dashboard</h2>
+      <h2 style={styles.h2}>Saathi Dashboard</h2>
       {companions.length === 0 ? (
-        <p style={styles.empty}>No companions available yet.</p>
+        <p style={styles.empty}>No saathis available yet.</p>
       ) : (
         renderTable(companions)
       )}
@@ -183,7 +183,7 @@ const closeModal = () => {
       {showMessageModal && (
         <div style={modalStyles.overlay}>
           <div style={modalStyles.modal}>
-            <h3 style={{ marginTop: 0 }}>Message Companion</h3>
+            <h3 style={{ marginTop: 0 }}>Message Saathi</h3>
             <textarea
               placeholder="Write your message…"
               value={messageText}

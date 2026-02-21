@@ -7,6 +7,7 @@ import NavBar from "./components/layout/NavBar";
 
 import GoogleLogin from "./pages/GoogleLogin";
 import DashboardPage from "./pages/DashboardPage";
+import HomePage from "./pages/HomePage";
 import CompanionForm from "./components/CompanionForm";
 import CompanionDashboardPage from "./pages/CompanionDashboardPage";
 import ParcelPage from "./pages/ParcelPage";
@@ -19,8 +20,8 @@ function HomeRedirect() {
   const { user, role, loading } = useAuth();
   if (loading) return <div style={{ padding: 20 }}>Checking login...</div>;
   if (!user) return <Navigate to="/login" replace />;
-  if (role === "admin") return <Navigate to="/admin" replace />;
-  return <Navigate to="/dashboard" replace />;
+  // if (role === "admin") return <Navigate to="/admin" replace />;
+  return <Navigate to="/home" replace />;
 }
 
 function App() {
@@ -36,6 +37,7 @@ function App() {
             <Route path="/" element={<HomeRedirect />} />
 
             <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+            <Route path="/home" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
             <Route path="/sender" element={<ProtectedRoute><ParcelPage /></ProtectedRoute>} />
             <Route path="/companion" element={<ProtectedRoute><CompanionForm /></ProtectedRoute>} />
             <Route path="/parcels" element={<ProtectedRoute><ParcelDashboardPage /></ProtectedRoute>} />

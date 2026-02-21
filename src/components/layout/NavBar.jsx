@@ -7,8 +7,13 @@ const NavBar = () => {
   const { user, role } = useAuth();
   console.log("NavBar useAuth:", { user, role }); // debug line
 
-//   if (!user) return null;
-  if (!user) return <Navigate to="/login" replace />;
+// If user is not signed in, show a simple nav with a Login link.
+  if (!user) {
+    return (
+      <>
+      </>
+    );
+  }
 
 //   // Admin: only show admin links
 //   if (role === "admin") {
@@ -22,14 +27,18 @@ const NavBar = () => {
 //   }
 
   return (
-    <nav className="navbar">
+    <>
+      <div className="top-panel">
+        <div className="logo-text">Parcel Matching</div>
+      </div>
+      <nav className="navbar">
       {/* Regular user links */}
       <Link to="/sender">Send Parcel</Link>
-      <Link to="/companion">Companion Form</Link>
+      <Link to="/companion">Become a Saathi</Link>
       <Link to="/parcels">Parcel Dashboard</Link>
-      <Link to="/companions">Companion Dashboard</Link>
-      <Link to="/profile/edit">Profile</Link>
+      <Link to="/companions">Saathi Dashboard</Link>
       <Link to="/messages">Messages</Link>
+      <Link to="/profile/edit">Profile</Link>
 
       {/* Admin-only links */}
       {role === "admin" && (
@@ -39,8 +48,11 @@ const NavBar = () => {
         </>
       )}
 
-      <SignOut />
+      <div className="nav-right">
+        <SignOut />
+      </div>
     </nav>
+    </>
   );
 };
 

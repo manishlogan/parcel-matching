@@ -28,6 +28,36 @@
   color: #61dafb;
 }
 
+/* Google sign-in button */
+.google-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+  background: #ffffff;
+  color: #202124;
+  border: 1px solid rgba(0,0,0,0.18);
+  padding: 12px 20px;
+  font-size: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  cursor: pointer;
+}
+
+.google-btn:hover {
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+}
+
+.google-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+
+.google-icon svg { display: block; width: 20px; height: 20px; }
+.google-text { font-weight: 600; letter-spacing: 0.2px; }
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
