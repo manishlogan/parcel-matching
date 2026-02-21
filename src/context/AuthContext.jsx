@@ -24,17 +24,21 @@ export const AuthProvider = ({ children }) => {
     setRole(role);
 
     // ✅ NEW: Save / update user in Firestore
-    await setDoc(
-      doc(db, "users", firebaseUser.uid),
-      {
-        uid: firebaseUser.uid,
-        email: firebaseUser.email,
-        displayName: firebaseUser.displayName,
-        role: role,
-        updatedAt: serverTimestamp(),
-      },
-      { merge: true }
-    );
+    try {
+      await setDoc(
+        doc(db, "users", firebaseUser.uid),
+        {
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          displayName: firebaseUser.displayName,
+          role: role,
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
+    } catch (err) {
+      console.error("Failed to update user doc in Firestore:", err);
+    }
   } else {
     setUser(null);
     setRole(null);

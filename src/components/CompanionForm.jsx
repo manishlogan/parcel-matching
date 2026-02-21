@@ -83,7 +83,7 @@ export default function CompanionForm() {
 
   return (
     <form onSubmit={handleSubmit} style={styles.form}>
-      <h2 style={styles.h2}>Companion Availability</h2>
+      <h2 style={styles.h2}>Saathi Availability</h2>
 
       <div style={styles.row}>
         <label style={styles.label}>Name *</label>
