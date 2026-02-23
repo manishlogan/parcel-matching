@@ -17,10 +17,9 @@ import ShowAllUsersPage from "./pages/admin/ShowAllUsersPage";
 import MessagesPage from "./pages/MessagesPage";
 
 function HomeRedirect() {
-  const { user, role, loading } = useAuth();
+  const { user, loading } = useAuth();
   if (loading) return <div style={{ padding: 20 }}>Checking login...</div>;
   if (!user) return <Navigate to="/login" replace />;
-  // if (role === "admin") return <Navigate to="/admin" replace />;
   return <Navigate to="/home" replace />;
 }
 

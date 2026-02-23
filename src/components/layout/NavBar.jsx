@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import SignOut from "../SignOut";
-import { Navigate } from "react-router-dom";
 import SahaayLogo from "../../assets/Sahaay.png";
 
 const NavBar = () => {
