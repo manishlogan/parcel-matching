@@ -78,9 +78,11 @@ const MessagesPage = () => {
     const textTrimmed = messageText.trim();
 
     // create the message in Firestore
+    const displayName = auth.currentUser.displayName || null;
     const docRef = await addDoc(collection(db, "messages"), {
       conversationId: activeConversation.id,
       senderId: auth.currentUser.uid,
+      displayName,
       text: textTrimmed,
       createdAt: serverTimestamp(),
       read: false,
@@ -91,6 +93,7 @@ const MessagesPage = () => {
       id: docRef.id,
       conversationId: activeConversation.id,
       senderId: auth.currentUser.uid,
+      displayName: displayName,
       text: textTrimmed,
       createdAt: new Date(), // local timestamp for ordering until server value arrives
       read: false,
