@@ -5,10 +5,10 @@ import PageLayout from "../../components/layout/PageLayout";
 
 const ShowAllUsersPage = () => {
   const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [unauthorized, setUnauthorized] = useState(false);
-  const [error, setError] = useState(null);
-  const [toast, setToast] = useState({ visible: false, message: "", type: "info" });
+  const [_loading, setLoading] = useState(true);
+  const [_unauthorized, setUnauthorized] = useState(false);
+  const [_error, setError] = useState(null);
+  const [_toast, setToast] = useState({ visible: false, message: "", type: "info" });
 
   const showToast = (message, type = "info", ms = 3000) => {
     setToast({ visible: true, message, type });
