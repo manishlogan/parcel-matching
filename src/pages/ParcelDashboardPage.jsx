@@ -96,7 +96,7 @@ export default function ParcelDashboardPage() {
   }, [originFilter, destinationFilter, typeFilter, searchText, dateRange, parcels]);
 
   const renderTable = (data) => (
-    <table>
+    <table className="table">
       <thead>
         <tr>
           <th>Sender</th>
@@ -214,7 +214,7 @@ return (
 
     <PageLayout title="Parcel Dashboard">
       <div>
-        <div>
+        <div className="filters-row">
         <input
           type="text"
           placeholder="Filter by Origin City"

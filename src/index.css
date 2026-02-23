@@ -86,24 +86,28 @@ button:hover {
 
 .navbar {
   display: flex;
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: 12px;
+  margin-bottom: 12px;
   align-items: center;
   background: #ffffff;
-  padding: 10px 16px;
+  padding: 6px 12px;
   border-bottom: 1px solid var(--border-color);
 }
 
 /* Top panel for logo (placeholder). We'll center later if needed. */
 .top-panel {
   background: #ffffff;
-  padding: 8px 0;
+  padding: 4px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .logo-text {
   max-width: var(--max-width);
-  margin: 0 auto;
-  text-align: left;
+  margin: 0;
+  text-align: center;
   font-weight: 600;
   color: var(--text-dark);
   padding: 0 16px;
@@ -154,12 +158,20 @@ button:hover {
 }
 
 .table tbody td {
-  padding: 14px 18px;
-  border-bottom: 1px solid #e0e0e0;
+  padding: 16px 18px;
+  border-bottom: 1px solid #e6e6e6;
+}
+
+.table tbody tr {
+  background: #ffffff;
+}
+
+.table tbody tr:nth-child(even) {
+  background: #fbfdff; /* subtle alternate row color */
 }
 
 .table tbody tr:hover {
-  background-color: #fafafa;
+  background-color: #f3f4f6;
 }
 
 /* HomePage stats */
@@ -190,4 +202,38 @@ button:hover {
 
 @media (max-width: 720px) {
   .stats-grid { grid-template-columns: 1fr; }
+}
+
+/* Filters row spacing */
+.filters-row input {
+  margin-right: 12px;
+  margin-bottom: 10px;
+}
+
+.filters-row input[type="date"] {
+  padding: 8px 10px;
+}
+
+/* Login logo above Google button */
+.login-logo {
+  width: 540px; /* 3x of 180px */
+  height: auto;
+  margin-bottom: 18px;
+  display: block;
+}
+
+@media (max-width: 480px) {
+  .login-logo { width: 420px; margin-bottom: 12px; } /* 3x of 140px */
+}
+
+/* NavBar logo: use the original (normal) size */
+.nav-logo {
+  width: 180px;
+  height: auto;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+@media (max-width: 480px) {
+  .nav-logo { width: 140px; }
 }

@@ -3,6 +3,7 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, googleProvider, db } from "../config/firebase";
 import { useAuth } from "../context/AuthContext";
 import { Navigate } from "react-router-dom";
+import SahaayLogo from "../assets/Sahaay.png";
 
 const ADMIN_EMAIL = "manishjain.forever@gmail.com";
 
@@ -36,11 +37,14 @@ const GoogleLogin = () => {
     <div
       style={{
         display: "flex",
+        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         height: "100vh",
       }}
     >
+      <img src={SahaayLogo} alt="Sahaay" className="login-logo" />
+
       <button className="google-btn" onClick={handleLogin}>
         <span className="google-icon" aria-hidden>
           {/* Google G SVG */}

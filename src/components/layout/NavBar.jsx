@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import SignOut from "../SignOut";
 import { Navigate } from "react-router-dom";
+import SahaayLogo from "../../assets/Sahaay.png";
 
 const NavBar = () => {
   const { user, role } = useAuth();
@@ -29,7 +30,7 @@ const NavBar = () => {
   return (
     <>
       <div className="top-panel">
-        <div className="logo-text">Parcel Matching</div>
+        <img src={SahaayLogo} alt="Sahaay" className="nav-logo" />
       </div>
       <nav className="navbar">
       {/* Regular user links */}
