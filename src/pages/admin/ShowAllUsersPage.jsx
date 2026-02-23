@@ -15,6 +15,10 @@ const ShowAllUsersPage = () => {
       setUnauthorized(false);
       setError(null);
       try {
+        if(loading || unauthorized || error){
+          console.log("Do nothing", { loading, unauthorized, error });
+        }
+
         if (!auth.currentUser) {
           setUsers([]);
           setUnauthorized(true);
